@@ -100,6 +100,29 @@
       box-shadow: 0 0 10px rgba(255, 215, 0, 0.7), 0 0 4px rgba(255, 255, 255, 0.3);
     }
 
+    .links {
+      margin-top: 30px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    .links a {
+      color: #ffd700;
+      text-decoration: none;
+      font-weight: bold;
+      padding: 6px 10px;
+      border-radius: 6px;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .links a:hover {
+      background: #ffd700;
+      color: #1e1e1e;
+    }
+
     .footer {
       margin-top: 20px;
       font-size: 14px;
@@ -135,13 +158,28 @@
     <button id="redoBtn">↪️ Redo</button>
     <button id="clearBtn">🧼 Clear</button>
     <button id="toggleGridBtn">🔲 Toggle Grid</button>
+    <button id="mirrorBtn">🪞 Mirror</button>
     <button id="saveBtn">💾 Save JPG</button>
   </div>
 
+  <!-- Resource Links -->
+  <div class="links">
+    <a href="http://www.doodxrpl.com" target="_blank">🌐 Website</a>
+    <a href="https://communityproject.threadless.com/" target="_blank">👕 Merch</a>
+    <a href="https://xrpl.services/?issuer=rn5Y9N8APtrc7PVqXdMjkG9qvfw7FWi4kC&currency=446F6F6400000000000000000000000000000000&limit=999999996140.6105" target="_blank">🪙 $dOOd Token</a>
+    <a href="https://dexscreener.com/xrpl/446f6f6400000000000000000000000000000000.rn5y9n8aptrc7pvqxdmjkg9qvfw7fwi4kc_xrp" target="_blank">📈 Chart</a>
+    <a href="https://twitter.com/doodxrpl" target="_blank">🐦 Twitter</a>
+    <a href="http://doodscord.com/" target="_blank">💬 Discord</a>
+    <a href="https://firstledger.net/token/rn5Y9N8APtrc7PVqXdMjkG9qvfw7FWi4kC/446F6F6400000000000000000000000000000000" target="_blank">📒 First Ledger</a>
+    <a href="https://xrp.cafe/collection/noggins" target="_blank">☕ XRP.Cafe</a>
+  </div>
+
+  <!-- Footer -->
   <footer class="footer">
     Powered by $dOOd on XRPL • Make art. Make history. 🚀
   </footer>
 
+  <!-- Script -->
   <script>
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
@@ -153,6 +191,7 @@
     const clearBtn = document.getElementById('clearBtn');
     const saveBtn = document.getElementById('saveBtn');
     const toggleGridBtn = document.getElementById('toggleGridBtn');
+    const mirrorBtn = document.getElementById('mirrorBtn');
 
     const size = 32;
     const cellSize = canvas.width / size;
@@ -163,6 +202,7 @@
     let isDrawing = false;
     let mode = 'brush';
     let showGrid = true;
+    let mirrorMode = false;
 
     function drawGrid() {
       for (let y = 0; y < size; y++) {
@@ -180,12 +220,19 @@
     function drawPixel(x, y) {
       if (x >= 0 && y >= 0 && x < size && y < size) {
         const newColor = (mode === 'eraser') ? '#ffffff' : colorPicker.value;
-        if (grid[y][x] !== newColor) {
-          history.push({ x, y, color: grid[y][x] });
-          redoStack = [];
-          grid[y][x] = newColor;
-          drawGrid();
+        const coords = [{ x, y }];
+        if (mirrorMode) {
+          const mirroredX = size - 1 - x;
+          if (mirroredX !== x) coords.push({ x: mirroredX, y });
         }
+        for (const { x: px, y: py } of coords) {
+          if (grid[py][px] !== newColor) {
+            history.push({ x: px, y: py, color: grid[py][px] });
+            grid[py][px] = newColor;
+          }
+        }
+        redoStack = [];
+        drawGrid();
       }
     }
 
@@ -270,6 +317,11 @@
     toggleGridBtn.addEventListener('click', () => {
       showGrid = !showGrid;
       drawGrid();
+    });
+
+    mirrorBtn.addEventListener('click', () => {
+      mirrorMode = !mirrorMode;
+      mirrorBtn.classList.toggle('active', mirrorMode);
     });
 
     saveBtn.addEventListener('click', () => {
