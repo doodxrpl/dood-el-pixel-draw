@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dood-el Pixel Draw</title>
   <style>
-    body {
+      body {
       background: #1e1e1e;
       color: #fff;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -45,35 +46,26 @@
       box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
     }
 
-    canvas {
-      border: 2px solid #444;
-      background: #fff;
-      cursor: crosshair;
-      touch-action: none;
-      box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
-    }
-
     .controls {
-      margin-top: 15px;
       display: flex;
       flex-wrap: wrap;
-      gap: 12px;
+      gap: 10px;
       justify-content: center;
+      margin: 15px 0;
     }
 
-    input[type="color"] {
-      border: none;
-      padding: 0;
-      width: 48px;
-      height: 48px;
+    input[type="color"],
+    input[type="text"],
+    select,
+    button {
+      height: 40px;
       border-radius: 8px;
-      box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
-      cursor: pointer;
+      border: 1px solid #ccc;
+      padding: 0 10px;
+      font-size: 14px;
     }
 
     button {
-      padding: 10px 16px;
-      font-size: 16px;
       background: linear-gradient(145deg, #2c2c2c, #1a1a1a);
       color: #fff;
       border: 1px solid #444;
@@ -131,10 +123,16 @@
       font-style: italic;
       opacity: 0.8;
     }
+
+    .footer {
+      margin-top: 20px;
+      font-size: 13px;
+      color: #aaa;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
-
   <!-- Banner -->
   <div class="banner">
     <img src="https://i.ibb.co/2RXPgwC/banner-DOODles-White.jpg" alt="$DOOD Banner">
@@ -146,10 +144,9 @@
     <h2>🎨 Dood-el: Pixel Draw (32x32)</h2>
   </header>
 
-  <!-- Canvas -->
+
   <canvas id="canvas" width="640" height="640"></canvas>
 
-  <!-- Controls -->
   <div class="controls">
     <input type="color" id="colorPicker" value="#000000">
     <button id="brushBtn" class="active">🖌️ Brush</button>
@@ -162,6 +159,18 @@
     <button id="saveBtn">💾 Save JPG</button>
   </div>
 
+  <div class="controls">
+    <input type="text" id="saveName" placeholder="Design name">
+    <button onclick="saveNamed()">💾 Save Named</button>
+    <button onclick="loadNamed()">🔁 Load Named</button>
+    <button onclick="deleteNamed()">🗑️ Delete</button>
+  </div>
+
+  <div class="controls">
+    <select id="savedList" onchange="loadFromList(this.value)">
+      <option disabled selected>Select a saved design</option>
+    </select>
+  </div>
   <!-- Resource Links -->
   <div class="links">
     <a href="http://www.doodxrpl.com" target="_blank">🌐 Website</a>
@@ -175,31 +184,19 @@
     <a href="https://xrp.cafe/collection/noggins" target="_blank">☕ XRP.Cafe</a>
   </div>
 
-  <!-- Footer -->
-  <footer class="footer">
-    Powered by $dOOd on XRPL • Make art. Make history. 🚀
-  </footer>
 
-  <!-- Script -->
+  <div class="footer">
+    Powered by $dOOd • Made with love on XRPL 🚀
+  </div>
+
   <script>
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
-    const colorPicker = document.getElementById('colorPicker');
-    const brushBtn = document.getElementById('brushBtn');
-    const eraserBtn = document.getElementById('eraserBtn');
-    const undoBtn = document.getElementById('undoBtn');
-    const redoBtn = document.getElementById('redoBtn');
-    const clearBtn = document.getElementById('clearBtn');
-    const saveBtn = document.getElementById('saveBtn');
-    const toggleGridBtn = document.getElementById('toggleGridBtn');
-    const mirrorBtn = document.getElementById('mirrorBtn');
-
     const size = 32;
     const cellSize = canvas.width / size;
     let grid = Array.from({ length: size }, () => Array(size).fill('#ffffff'));
     let history = [];
     let redoStack = [];
-
     let isDrawing = false;
     let mode = 'brush';
     let showGrid = true;
@@ -219,25 +216,23 @@
     }
 
     function drawPixel(x, y) {
-      if (x >= 0 && y >= 0 && x < size && y < size) {
-        const newColor = (mode === 'eraser') ? '#ffffff' : colorPicker.value;
-        const coords = [{ x, y }];
+      const color = mode === 'eraser' ? '#ffffff' : document.getElementById('colorPicker').value;
+      if (grid[y][x] !== color) {
+        history.push({ x, y, color: grid[y][x] });
+        redoStack = [];
+        grid[y][x] = color;
         if (mirrorMode) {
-          const mirroredX = size - 1 - x;
-          if (mirroredX !== x) coords.push({ x: mirroredX, y });
-        }
-        for (const { x: px, y: py } of coords) {
-          if (grid[py][px] !== newColor) {
-            history.push({ x: px, y: py, color: grid[py][px] });
-            grid[py][px] = newColor;
+          const mx = size - 1 - x;
+          if (grid[y][mx] !== color) {
+            history.push({ x: mx, y, color: grid[y][mx] });
+            grid[y][mx] = color;
           }
         }
-        redoStack = [];
         drawGrid();
       }
     }
 
-    function getCanvasCoords(e) {
+    function getCoords(e) {
       const rect = canvas.getBoundingClientRect();
       const clientX = e.touches ? e.touches[0].clientX : e.clientX;
       const clientY = e.touches ? e.touches[0].clientY : e.clientY;
@@ -249,91 +244,121 @@
 
     canvas.addEventListener('mousedown', (e) => {
       isDrawing = true;
-      const { x, y } = getCanvasCoords(e);
+      const { x, y } = getCoords(e);
       drawPixel(x, y);
     });
-
     canvas.addEventListener('mousemove', (e) => {
       if (!isDrawing) return;
-      const { x, y } = getCanvasCoords(e);
+      const { x, y } = getCoords(e);
       drawPixel(x, y);
     });
-
-    canvas.addEventListener('mouseup', () => { isDrawing = false; });
-    canvas.addEventListener('mouseleave', () => { isDrawing = false; });
+    canvas.addEventListener('mouseup', () => isDrawing = false);
+    canvas.addEventListener('mouseleave', () => isDrawing = false);
 
     canvas.addEventListener('touchstart', (e) => {
+      e.preventDefault();
       isDrawing = true;
-      const { x, y } = getCanvasCoords(e);
+      const { x, y } = getCoords(e);
       drawPixel(x, y);
     }, { passive: false });
 
     canvas.addEventListener('touchmove', (e) => {
+      e.preventDefault();
       if (!isDrawing) return;
-      const { x, y } = getCanvasCoords(e);
+      const { x, y } = getCoords(e);
       drawPixel(x, y);
     }, { passive: false });
 
-    canvas.addEventListener('touchend', () => { isDrawing = false; });
+    canvas.addEventListener('touchend', () => isDrawing = false);
 
-    brushBtn.addEventListener('click', () => {
+    document.getElementById('brushBtn').onclick = () => {
       mode = 'brush';
       brushBtn.classList.add('active');
       eraserBtn.classList.remove('active');
-    });
-
-    eraserBtn.addEventListener('click', () => {
+    };
+    document.getElementById('eraserBtn').onclick = () => {
       mode = 'eraser';
       eraserBtn.classList.add('active');
       brushBtn.classList.remove('active');
-    });
-
-    undoBtn.addEventListener('click', () => {
+    };
+    document.getElementById('undoBtn').onclick = () => {
       const last = history.pop();
       if (last) {
         redoStack.push({ x: last.x, y: last.y, color: grid[last.y][last.x] });
         grid[last.y][last.x] = last.color;
         drawGrid();
       }
-    });
-
-    redoBtn.addEventListener('click', () => {
+    };
+    document.getElementById('redoBtn').onclick = () => {
       const last = redoStack.pop();
       if (last) {
         history.push({ x: last.x, y: last.y, color: grid[last.y][last.x] });
         grid[last.y][last.x] = last.color;
         drawGrid();
       }
-    });
-
-    clearBtn.addEventListener('click', () => {
+    };
+    document.getElementById('clearBtn').onclick = () => {
       history.push(...grid.flatMap((_, y) =>
         grid[y].map((color, x) => ({ x, y, color }))
       ));
       grid = Array.from({ length: size }, () => Array(size).fill('#ffffff'));
-      drawGrid();
       redoStack = [];
-    });
-
-    toggleGridBtn.addEventListener('click', () => {
+      drawGrid();
+    };
+    document.getElementById('toggleGridBtn').onclick = () => {
       showGrid = !showGrid;
       drawGrid();
-    });
-
-    mirrorBtn.addEventListener('click', () => {
+    };
+    document.getElementById('mirrorBtn').onclick = () => {
       mirrorMode = !mirrorMode;
-      mirrorBtn.classList.toggle('active', mirrorMode);
-    });
-
-    saveBtn.addEventListener('click', () => {
+      alert(`Mirror mode: ${mirrorMode ? "ON" : "OFF"}`);
+    };
+    document.getElementById('saveBtn').onclick = () => {
       const link = document.createElement('a');
-      link.download = 'dood-el-pixel-art.jpg';
+      link.download = 'dood-pixel-art.jpg';
       link.href = canvas.toDataURL('image/jpeg', 1.0);
       link.click();
-    });
+    };
 
+    function saveNamed() {
+      const name = document.getElementById('saveName').value.trim();
+      if (!name) return alert("Enter a name to save.");
+      localStorage.setItem(`doodNamed:${name}`, JSON.stringify(grid));
+      updateSavedDropdown();
+      alert(`Saved as "${name}"`);
+    }
+    function loadNamed() {
+      const name = document.getElementById('saveName').value.trim();
+      const data = localStorage.getItem(`doodNamed:${name}`);
+      if (!data) return alert("No saved design found.");
+      grid = JSON.parse(data);
+      drawGrid();
+    }
+    function deleteNamed() {
+      const name = document.getElementById('saveName').value.trim();
+      localStorage.removeItem(`doodNamed:${name}`);
+      updateSavedDropdown();
+    }
+    function updateSavedDropdown() {
+      const list = document.getElementById('savedList');
+      list.innerHTML = '<option disabled selected>Select a saved design</option>';
+      Object.keys(localStorage)
+        .filter(k => k.startsWith('doodNamed:'))
+        .forEach(k => {
+          const name = k.replace('doodNamed:', '');
+          const option = document.createElement('option');
+          option.value = name;
+          option.textContent = name;
+          list.appendChild(option);
+        });
+    }
+    function loadFromList(name) {
+      document.getElementById('saveName').value = name;
+      loadNamed();
+    }
+
+    updateSavedDropdown();
     drawGrid();
   </script>
-
 </body>
 </html>
