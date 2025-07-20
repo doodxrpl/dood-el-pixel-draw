@@ -137,9 +137,10 @@
     <button onclick="deleteNamed()">🗑️ Delete</button>
   </div>
   <div class="controls">
-    <select id="savedList" onchange="loadFromList(this.value)">
+    <select id="savedList" onchange="handleTemplateLoad(this.value)">
       <option disabled selected>Select a saved design</option>
-      <option value="Save your Design">📦 Build-a-Dood</option>
+      <option value="__buildADood">📦 Build-a-Dood</option>
+      <option value="__sheepDood">🐑 Sheep Template</option>
     </select>
   </div>
   <div class="links">
@@ -162,7 +163,7 @@
     let grid = Array.from({ length: size }, () => Array(size).fill('#ffffff'));
     let history = [], redoStack = [];
     let isDrawing = false, mode = 'brush', showGrid = true, mirrorMode = false;
-    let brickMode = false; // NEW brick mode toggle
+    let brickMode = false;
 
     function drawGrid() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -177,17 +178,14 @@
       }
     }
 
-    // Draw a single tile, normal or brick mode
     function drawTile(x, y, color) {
       const px = x * cellSize;
       const py = y * cellSize;
 
-      // Base square
       ctx.fillStyle = color;
       ctx.fillRect(px, py, cellSize, cellSize);
 
       if (brickMode && color !== '#ffffff') {
-        // Brick stud shading
         ctx.strokeStyle = 'rgba(0,0,0,0.15)';
         ctx.strokeRect(px, py, cellSize, cellSize);
 
@@ -204,9 +202,9 @@
       }
     }
 
-    function loadBuildADoodTemplate() {
+    function loadImageTemplate(url) {
       const img = new Image();
-      img.src = 'https://i.ibb.co/yB60PRWs/build-a-dood.jpg';
+      img.src = url;
       img.crossOrigin = 'Anonymous';
       img.onload = function () {
         const tempCanvas = document.createElement('canvas');
@@ -224,7 +222,17 @@
         }
         drawGrid();
       };
-      img.onerror = () => alert("Failed to load Build-a-Dood image.");
+      img.onerror = () => alert("Failed to load template image.");
+    }
+
+    function handleTemplateLoad(value) {
+      if (value === '__buildADood') {
+        loadImageTemplate('https://i.ibb.co/yB60PRWs/build-a-dood.jpg');
+      } else if (value === '__sheepDood') {
+        loadImageTemplate('https://i.ibb.co/7t1RBWG8/dood-pixel-art-34.jpg');
+      } else {
+        loadFromList(value);
+      }
     }
 
     function drawPixel(x, y) {
@@ -262,11 +270,6 @@
     canvas.addEventListener('touchmove', e => { e.preventDefault(); if (isDrawing) drawPixel(...Object.values(getCoords(e))); }, { passive: false });
     canvas.addEventListener('touchend', () => isDrawing = false);
 
-    document.getElementById('savedList').addEventListener('change', function () {
-      if (this.value === '__buildADood') loadBuildADoodTemplate();
-      else loadFromList(this.value);
-    });
-
     document.getElementById('brushBtn').onclick = () => { mode = 'brush'; brushBtn.classList.add('active'); eraserBtn.classList.remove('active'); };
     document.getElementById('eraserBtn').onclick = () => { mode = 'eraser'; eraserBtn.classList.add('active'); brushBtn.classList.remove('active'); };
     document.getElementById('undoBtn').onclick = () => { const last = history.pop(); if (last) { redoStack.push({ x: last.x, y: last.y, color: grid[last.y][last.x] }); grid[last.y][last.x] = last.color; drawGrid(); } };
@@ -277,7 +280,7 @@
     document.getElementById('brickBtn').onclick = () => { 
       brickMode = !brickMode; 
       document.getElementById('brickBtn').classList.toggle('active', brickMode);
-      drawGrid(); // re-render in new mode
+      drawGrid(); 
     };
     document.getElementById('saveBtn').onclick = () => { const link = document.createElement('a'); link.download = 'dood-pixel-art.jpg'; link.href = canvas.toDataURL('image/jpeg', 1.0); link.click(); };
 
@@ -302,11 +305,10 @@
     }
     function updateSavedDropdown() {
       const list = document.getElementById('savedList');
-      list.innerHTML = '<option disabled selected>Select a saved design</option>';
-      const buildOption = document.createElement('option');
-      buildOption.value = '__buildADood';
-      buildOption.innerHTML = '📦 Build-a-Dood';
-      list.appendChild(buildOption);
+      // Keep default options
+      list.innerHTML = '<option disabled selected>Select a saved design</option>' +
+                       '<option value="__buildADood">📦 Build-a-Dood</option>' +
+                       '<option value="__sheepDood">🐑 Sheep Template</option>';
       Object.keys(localStorage).filter(k => k.startsWith('doodNamed:')).forEach(k => {
         const name = k.replace('doodNamed:', '');
         const option = document.createElement('option');
