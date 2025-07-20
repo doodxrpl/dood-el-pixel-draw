@@ -127,6 +127,7 @@
     <button id="clearBtn">🧼 Clear</button>
     <button id="toggleGridBtn">🔲</button>
     <button id="mirrorBtn">🪞</button>
+    <button id="brickBtn">🧱</button>
     <button id="saveBtn">💾</button>
   </div>
   <div class="controls">
@@ -161,12 +162,13 @@
     let grid = Array.from({ length: size }, () => Array(size).fill('#ffffff'));
     let history = [], redoStack = [];
     let isDrawing = false, mode = 'brush', showGrid = true, mirrorMode = false;
+    let brickMode = false; // NEW brick mode toggle
 
     function drawGrid() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
       for (let y = 0; y < size; y++) {
         for (let x = 0; x < size; x++) {
-          ctx.fillStyle = grid[y][x];
-          ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+          drawTile(x, y, grid[y][x]);
           if (showGrid) {
             ctx.strokeStyle = '#ccc';
             ctx.strokeRect(x * cellSize, y * cellSize, cellSize, cellSize);
@@ -175,9 +177,36 @@
       }
     }
 
+    // Draw a single tile, normal or brick mode
+    function drawTile(x, y, color) {
+      const px = x * cellSize;
+      const py = y * cellSize;
+
+      // Base square
+      ctx.fillStyle = color;
+      ctx.fillRect(px, py, cellSize, cellSize);
+
+      if (brickMode && color !== '#ffffff') {
+        // Brick stud shading
+        ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+        ctx.strokeRect(px, py, cellSize, cellSize);
+
+        const studRadius = cellSize * 0.2;
+        const cx = px + cellSize / 2;
+        const cy = py + cellSize / 2;
+        const gradient = ctx.createRadialGradient(cx, cy, studRadius * 0.3, cx, cy, studRadius);
+        gradient.addColorStop(0, 'rgba(255,255,255,0.6)');
+        gradient.addColorStop(1, 'rgba(0,0,0,0.3)');
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(cx, cy, studRadius, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
     function loadBuildADoodTemplate() {
       const img = new Image();
-        img.src = 'https://i.ibb.co/yB60PRWs/build-a-dood.jpg';
+      img.src = 'https://i.ibb.co/yB60PRWs/build-a-dood.jpg';
       img.crossOrigin = 'Anonymous';
       img.onload = function () {
         const tempCanvas = document.createElement('canvas');
@@ -245,6 +274,11 @@
     document.getElementById('clearBtn').onclick = () => { history.push(...grid.flatMap((_, y) => grid[y].map((color, x) => ({ x, y, color })))); grid = Array.from({ length: size }, () => Array(size).fill('#ffffff')); redoStack = []; drawGrid(); };
     document.getElementById('toggleGridBtn').onclick = () => { showGrid = !showGrid; drawGrid(); };
     document.getElementById('mirrorBtn').onclick = () => { mirrorMode = !mirrorMode; alert(`Mirror mode: ${mirrorMode ? "ON" : "OFF"}`); };
+    document.getElementById('brickBtn').onclick = () => { 
+      brickMode = !brickMode; 
+      document.getElementById('brickBtn').classList.toggle('active', brickMode);
+      drawGrid(); // re-render in new mode
+    };
     document.getElementById('saveBtn').onclick = () => { const link = document.createElement('a'); link.download = 'dood-pixel-art.jpg'; link.href = canvas.toDataURL('image/jpeg', 1.0); link.click(); };
 
     function saveNamed() {
