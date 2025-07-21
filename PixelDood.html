@@ -14,13 +14,6 @@
       align-items: center;
       margin: 10px;
     }
-    h2 {
-      font-size: 22px;
-      color: #ffd700;
-      text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
-      margin: 0 0 10px 0;
-      text-align: center;
-    }
     .banner img {
       width: 100%;
       max-height: 200px;
@@ -37,9 +30,16 @@
       margin-bottom: 10px;
       gap: 8px;
     }
+    h2 {
+      font-size: 22px;
+      color: #ffd700;
+      text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+      margin: 0 0 10px 0;
+      text-align: center;
+    }
     canvas {
       background: #fff;
-      touch-action: none; /* prevents scrolling while drawing */
+      touch-action: none;
       max-width: 95vw;
       height: auto;
       border: 2px solid #333;
@@ -62,10 +62,7 @@
       background: #222;
       color: #fff;
       font-size: 14px;
-    }
-    button {
       cursor: pointer;
-      background: #2c2c2c;
     }
     button:hover {
       background: #3a3a3a;
@@ -75,13 +72,7 @@
     }
     .active {
       border: 2px solid #ffd700;
-    }
-    @media (max-width: 600px) {
-      h2 { font-size: 18px; }
-      button, select, input[type="color"], input[type="text"] {
-        font-size: 12px;
-        height: 32px;
-      }
+      box-shadow: 0 0 8px rgba(255, 215, 0, 0.7);
     }
     .links {
       margin-top: 20px;
@@ -119,9 +110,8 @@
     <img src="https://i.ibb.co/2Y620t59/DOOD-200200.png" alt="Dood Logo" class="logo" width="48">
     <h2>🎨 Dood-el: Pixel Draw</h2>
   </header>
-
-  <!-- Top row with grid size -->
-  <div class="topbar">
+  <!-- Grid size selector -->
+  <div class="controls">
     <label>Grid Size:</label>
     <select id="gridSizeSelect">
       <option value="12">12×12</option>
@@ -133,40 +123,38 @@
   <!-- Canvas -->
   <canvas id="canvas"></canvas>
 
-  <!-- Row 1: Drawing tools -->
+  <!-- Tools -->
   <div class="controls">
     <input type="color" id="colorPicker" value="#000000">
-    <button id="brushBtn" class="active">🖌️</button>
-    <button id="eraserBtn">🧽</button>
-    <button id="undoBtn">↩️</button>
-    <button id="redoBtn">↪️</button>
+    <button id="brushBtn" class="active">🖌️ Brush</button>
+    <button id="eraserBtn">🧽 Eraser</button>
+    <button id="bucketBtn">🪣 Fill</button>
+    <button id="undoBtn">↩️ Undo</button>
+    <button id="redoBtn">↪️ Redo</button>
     <button id="clearBtn">🧼 Clear</button>
   </div>
 
-  <!-- Row 2: Canvas toggles -->
+  <!-- Toggles -->
   <div class="controls">
     <button id="toggleGridBtn">🔲 Grid</button>
     <button id="mirrorBtn">🪞 Mirror</button>
     <button id="brickBtn">🧱 Brick</button>
-    <button id="saveBtn">💾 Download Image</button>
   </div>
 
-  <!-- Row 3: Saved Designs + Templates -->
+  <!-- Saved Designs + Quick Templates -->
   <div class="controls">
-    <!-- Saved designs dropdown -->
     <select id="savedList" onchange="handleTemplateLoad(this.value)">
       <option disabled selected>Select a saved design</option>
     </select>
-    <!-- Quick template buttons -->
     <button onclick="handleTemplateLoad('__buildADood')">📦 Build-a-Dood</button>
-    <button onclick="handleTemplateLoad('__sheepDood')">🐑 Sheep Template</button>
+    <button onclick="handleTemplateLoad('__sheepDood')">🐑 Sheep</button>
   </div>
 
-  <!-- Row 4: Save/load named -->
+  <!-- Save/Load/Delete -->
   <div class="controls">
     <input type="text" id="saveName" placeholder="Design name">
     <button onclick="saveNamed()">💾 Save Design</button>
-    <button onclick="loadNamed()">🔁 Load Name</button>
+    <button onclick="loadNamed()">🔁 Load</button>
     <button onclick="deleteNamed()">🗑️ Delete</button>
   </div>
 
@@ -192,12 +180,14 @@
     let cellSize = 20;
     let showGrid = true;
     let history = [], redoStack = [];
-    let isDrawing = false, mode = "brush", mirrorMode = false, brickMode = false;
+    let isDrawing = false;
+    let mode = "brush";
+    let mirrorMode = false, brickMode = false;
     let canvasSizePx = 640;
 
-    function resizeCanvasForDevice() {
+    function resizeCanvas() {
       const availableWidth = Math.min(window.innerWidth * 0.95, 640);
-      canvasSizePx = Math.floor(availableWidth);
+      canvasSizePx = availableWidth;
       canvas.width = canvasSizePx;
       canvas.height = canvasSizePx;
       cellSize = canvas.width / gridSize;
@@ -219,7 +209,7 @@
       }
 
       if (showGrid) {
-        ctx.strokeStyle = "#999";
+        ctx.strokeStyle = "#aaa";
         for (let i = 0; i <= gridSize; i++) {
           let pos = i * cellSize;
           ctx.beginPath();
@@ -234,28 +224,21 @@
       }
     }
 
-    // ✅ Fixed Brick Mode: draws stud on top of base color
     function drawTile(x, y, color) {
       const px = x * cellSize;
       const py = y * cellSize;
-
-      // Base square
       ctx.fillStyle = color;
       ctx.fillRect(px, py, cellSize, cellSize);
 
-      // Brick Mode stud overlay
       if (brickMode && color !== "#ffffff") {
-        // Subtle brick border
         ctx.strokeStyle = "rgba(0,0,0,0.15)";
         ctx.strokeRect(px, py, cellSize, cellSize);
-
-        // Draw stud bump
-        const studRadius = cellSize * 0.25;
+        const studRadius = cellSize * 0.2;
         const cx = px + cellSize / 2;
         const cy = py + cellSize / 2;
         const gradient = ctx.createRadialGradient(cx, cy, studRadius * 0.3, cx, cy, studRadius);
-        gradient.addColorStop(0, "rgba(255,255,255,0.7)"); // highlight
-        gradient.addColorStop(1, "rgba(0,0,0,0.3)");      // shadow
+        gradient.addColorStop(0, "rgba(255,255,255,0.6)");
+        gradient.addColorStop(1, "rgba(0,0,0,0.3)");
         ctx.fillStyle = gradient;
         ctx.beginPath();
         ctx.arc(cx, cy, studRadius, 0, Math.PI * 2);
@@ -281,6 +264,23 @@
       }
     }
 
+    function fillBucket(x, y) {
+      const targetColor = grid[y][x];
+      const fillColor = document.getElementById("colorPicker").value;
+      if (targetColor === fillColor) return;
+
+      const stack = [[x, y]];
+      while (stack.length) {
+        const [cx, cy] = stack.pop();
+        if (cx < 0 || cy < 0 || cx >= gridSize || cy >= gridSize) continue;
+        if (grid[cy][cx] !== targetColor) continue;
+
+        grid[cy][cx] = fillColor;
+        stack.push([cx + 1, cy], [cx - 1, cy], [cx, cy + 1], [cx, cy - 1]);
+      }
+      drawGrid();
+    }
+
     function getCoords(e) {
       const rect = canvas.getBoundingClientRect();
       const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -291,7 +291,12 @@
       };
     }
 
-    // ✅ Template loader
+    function setActiveTool(toolButton) {
+      document.querySelectorAll(".controls button").forEach(btn => btn.classList.remove("active"));
+      if (toolButton) toolButton.classList.add("active");
+    }
+
+    // Templates
     function loadImageTemplate(url) {
       const img = new Image();
       img.src = url;
@@ -326,7 +331,7 @@
       }
     }
 
-    // ✅ Save/Load/Delete named designs
+    // Save/Load/Delete
     function saveNamed() {
       const name = document.getElementById("saveName").value.trim();
       if (!name) return alert("Enter a name to save.");
@@ -362,27 +367,48 @@
       loadNamed();
     }
 
-    // ✅ Grid size change
-    document.getElementById("gridSizeSelect").onchange = (e) => {
-      const newSize = parseInt(e.target.value);
-      gridSize = newSize;
-      grid = initGrid(newSize);
-      cellSize = canvas.width / gridSize;
-      drawGrid();
-    };
-
-    // ✅ Mouse + Touch Events
-    canvas.addEventListener("mousedown", e => { isDrawing = true; drawPixel(...Object.values(getCoords(e))); });
-    canvas.addEventListener("mousemove", e => { if (isDrawing) drawPixel(...Object.values(getCoords(e))); });
+    // Mouse + Touch Events
+    canvas.addEventListener("mousedown", e => {
+      const { x, y } = getCoords(e);
+      if (mode === "bucket") {
+        fillBucket(x, y);
+        mode = "brush";
+        setActiveTool(document.getElementById("brushBtn"));
+        return;
+      }
+      isDrawing = true;
+      drawPixel(x, y);
+    });
+    canvas.addEventListener("mousemove", e => {
+      if (!isDrawing || mode === "bucket") return;
+      drawPixel(...Object.values(getCoords(e)));
+    });
     canvas.addEventListener("mouseup", () => isDrawing = false);
     canvas.addEventListener("mouseleave", () => isDrawing = false);
-    canvas.addEventListener("touchstart", e => { e.preventDefault(); isDrawing = true; drawPixel(...Object.values(getCoords(e))); }, { passive: false });
-    canvas.addEventListener("touchmove", e => { e.preventDefault(); if (isDrawing) drawPixel(...Object.values(getCoords(e))); }, { passive: false });
+    canvas.addEventListener("touchstart", e => {
+      e.preventDefault();
+      const { x, y } = getCoords(e);
+      if (mode === "bucket") {
+        fillBucket(x, y);
+        mode = "brush";
+        setActiveTool(document.getElementById("brushBtn"));
+        return;
+      }
+      isDrawing = true;
+      drawPixel(x, y);
+    }, { passive: false });
+    canvas.addEventListener("touchmove", e => {
+      e.preventDefault();
+      if (!isDrawing || mode === "bucket") return;
+      drawPixel(...Object.values(getCoords(e)));
+    }, { passive: false });
     canvas.addEventListener("touchend", () => isDrawing = false);
 
-    // ✅ Tool Buttons
-    document.getElementById("brushBtn").onclick = () => { mode = "brush"; };
-    document.getElementById("eraserBtn").onclick = () => { mode = "eraser"; };
+    // Tool Buttons
+    document.getElementById("brushBtn").onclick = () => { mode = "brush"; setActiveTool(document.getElementById("brushBtn")); };
+    document.getElementById("eraserBtn").onclick = () => { mode = "eraser"; setActiveTool(document.getElementById("eraserBtn")); };
+    document.getElementById("bucketBtn").onclick = () => { mode = "bucket"; setActiveTool(document.getElementById("bucketBtn")); };
+
     document.getElementById("undoBtn").onclick = () => {
       const last = history.pop();
       if (last) {
@@ -403,18 +429,17 @@
     document.getElementById("toggleGridBtn").onclick = () => { showGrid = !showGrid; drawGrid(); };
     document.getElementById("mirrorBtn").onclick = () => { mirrorMode = !mirrorMode; alert(`Mirror mode: ${mirrorMode ? "ON" : "OFF"}`); };
     document.getElementById("brickBtn").onclick = () => { brickMode = !brickMode; drawGrid(); };
-    document.getElementById("saveBtn").onclick = () => {
-      const link = document.createElement("a");
-      link.download = "dood-pixel-art.png";
-      link.href = canvas.toDataURL("image/png");
-      link.click();
+
+    document.getElementById("gridSizeSelect").onchange = (e) => {
+      gridSize = parseInt(e.target.value);
+      grid = initGrid(gridSize);
+      cellSize = canvas.width / gridSize;
+      drawGrid();
     };
 
-    // ✅ Responsive resize
-    window.addEventListener("resize", resizeCanvasForDevice);
+    window.addEventListener("resize", resizeCanvas);
 
-    // ✅ Init
-    resizeCanvasForDevice();
+    resizeCanvas();
     updateSavedDropdown();
   </script>
 </body>
