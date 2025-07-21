@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,101 +7,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
   <title>Dood-el Pixel Draw</title>
   <style>
-    body {
-      background: #1e1e1e;
-      color: #fff;
-      font-family: 'Segoe UI', Tahoma, sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin: 10px;
-    }
-    .banner img {
-      width: 100%;
-      max-height: 200px;
-      object-fit: cover;
-      border-bottom: 2px solid #444;
-      margin-bottom: 10px;
-    }
-    .topbar {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: center;
-      width: 100%;
-      margin-bottom: 10px;
-      gap: 8px;
-    }
-    h2 {
-      font-size: 22px;
-      color: #ffd700;
-      text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
-      margin: 0 0 10px 0;
-      text-align: center;
-    }
-    canvas {
-      background: #fff;
-      touch-action: none;
-      max-width: 95vw;
-      height: auto;
-      border: 2px solid #333;
-    }
-    .controls {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      justify-content: center;
-      margin: 10px 0;
-    }
-    input[type="color"],
-    select,
-    button,
-    input[type="text"] {
-      height: 36px;
-      border-radius: 6px;
-      border: 1px solid #444;
-      padding: 0 8px;
-      background: #222;
-      color: #fff;
-      font-size: 14px;
-      cursor: pointer;
-    }
-    button:hover {
-      background: #3a3a3a;
-    }
-    button:active {
-      transform: scale(0.97);
-    }
-    .active {
-      border: 2px solid #ffd700;
-      box-shadow: 0 0 8px rgba(255, 215, 0, 0.7);
-    }
-    .links {
-      margin-top: 20px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 15px;
-      justify-content: center;
-      font-size: 14px;
-    }
-    .links a {
-      color: #ffd700;
-      text-decoration: none;
-      font-weight: bold;
-      padding: 6px 10px;
-      border-radius: 6px;
-      transition: background 0.2s, color 0.2s;
-    }
-    .links a:hover {
-      background: #ffd700;
-      color: #1e1e1e;
-    }
-    .footer {
-      margin-top: 20px;
-      font-size: 13px;
-      color: #aaa;
-      text-align: center;
-    }
+    body { background:#1e1e1e; color:#fff; font-family:'Segoe UI',sans-serif; display:flex; flex-direction:column; align-items:center; margin:10px; }
+    .banner img { width:100%; max-height:200px; object-fit:cover; border-bottom:2px solid #444; margin-bottom:10px; }
+    .topbar { display:flex; flex-wrap:wrap; align-items:center; justify-content:center; width:100%; margin-bottom:10px; gap:8px; }
+    h2 { font-size:22px; color:#ffd700; text-shadow:0 0 10px rgba(255,215,0,0.5); margin:0 0 10px; text-align:center; }
+    canvas { background:#fff; touch-action:none; border:2px solid #333; }
+    .controls { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin:10px 0; }
+    input[type=color], select, button, input[type=text] { height:36px; border-radius:6px; border:1px solid #444; padding:0 8px; background:#222; color:#fff; font-size:14px; cursor:pointer; }
+    button:hover { background:#3a3a3a; }
+    button:active { transform:scale(0.97); }
+    .active { border:2px solid #ffd700; box-shadow:0 0 8px rgba(255,215,0,0.7); }
+    .links { margin-top:20px; display:flex; flex-wrap:wrap; gap:15px; justify-content:center; font-size:14px; }
+    .links a { color:#ffd700; text-decoration:none; font-weight:bold; padding:6px 10px; border-radius:6px; transition:background 0.2s,color 0.2s; }
+    .links a:hover { background:#ffd700; color:#1e1e1e; }
+    .footer { margin-top:20px; font-size:13px; color:#aaa; text-align:center; }
   </style>
 </head>
 <body>
@@ -110,7 +31,7 @@
     <img src="https://i.ibb.co/2Y620t59/DOOD-200200.png" alt="Dood Logo" class="logo" width="48">
     <h2>🎨 Dood-el: Pixel Draw</h2>
   </header>
-  <!-- Grid size selector -->
+
   <div class="controls">
     <label>Grid Size:</label>
     <select id="gridSizeSelect">
@@ -120,10 +41,8 @@
     </select>
   </div>
 
-  <!-- Canvas -->
   <canvas id="canvas"></canvas>
 
-  <!-- Tools -->
   <div class="controls">
     <input type="color" id="colorPicker" value="#000000">
     <button id="brushBtn" class="active">🖌️ Brush</button>
@@ -134,14 +53,15 @@
     <button id="clearBtn">🧼 Clear</button>
   </div>
 
-  <!-- Toggles -->
+  <!-- Toggles + Save + Share -->
   <div class="controls">
     <button id="toggleGridBtn">🔲 Grid</button>
     <button id="mirrorBtn">🪞 Mirror</button>
     <button id="brickBtn">🧱 Brick</button>
+    <button onclick="saveAsJPG()">⬇️ Save Image</button>
+    <button onclick="shareOnTwitter()">🐦 Share on X</button>
   </div>
 
-  <!-- Saved Designs + Quick Templates -->
   <div class="controls">
     <select id="savedList" onchange="handleTemplateLoad(this.value)">
       <option disabled selected>Select a saved design</option>
@@ -150,7 +70,6 @@
     <button onclick="handleTemplateLoad('__sheepDood')">🐑 Sheep</button>
   </div>
 
-  <!-- Save/Load/Delete -->
   <div class="controls">
     <input type="text" id="saveName" placeholder="Design name">
     <button onclick="saveNamed()">💾 Save Design</button>
@@ -169,126 +88,89 @@
     <a href="https://firstledger.net/token/rn5Y9N8APtrc7PVqXdMjkG9qvfw7FWi4kC/446F6F6400000000000000000000000000000000" target="_blank">📒 First Ledger</a>
     <a href="https://xrp.cafe/collection/noggins" target="_blank">☕ XRP.Cafe</a>
   </div>
+
   <div class="footer">Powered by $dOOd • Made with love on XRPL 🚀</div>
 
   <script>
     const canvas = document.getElementById("canvas");
     const ctx = canvas.getContext("2d");
-
-    let gridSize = 32;
-    let grid = [];
-    let cellSize = 20;
-    let showGrid = true;
-    let history = [], redoStack = [];
-    let isDrawing = false;
-    let mode = "brush";
-    let mirrorMode = false, brickMode = false;
-    let canvasSizePx = 640;
-
-    function resizeCanvas() {
-      const availableWidth = Math.min(window.innerWidth * 0.95, 640);
-      canvasSizePx = availableWidth;
-      canvas.width = canvasSizePx;
-      canvas.height = canvasSizePx;
-      cellSize = canvas.width / gridSize;
-      drawGrid();
-    }
+    let gridSize = 32, grid = [], cellSize = 20;
+    let showGrid = true, history = [], redoStack = [];
+    let isDrawing = false, mode = "brush";
+    let mirrorMode = false, brickMode = false, canvasSizePx = 640;
 
     function initGrid(size = gridSize) {
       return Array.from({ length: size }, () => Array(size).fill("#ffffff"));
     }
     grid = initGrid();
 
+    function resizeCanvas() {
+      // ✅ always keep square and responsive
+      const availableWidth = Math.min(window.innerWidth * 0.95, 640);
+      canvasSizePx = availableWidth;
+      canvas.width = canvasSizePx;
+      canvas.height = canvasSizePx;
+      cellSize = canvasSizePx / gridSize;
+      drawGrid();
+    }
+
     function drawGrid() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-
       for (let y = 0; y < gridSize; y++) {
-        for (let x = 0; x < gridSize; x++) {
-          drawTile(x, y, grid[y][x]);
-        }
+        for (let x = 0; x < gridSize; x++) drawTile(x, y, grid[y][x]);
       }
-
+      // Only draw grid lines if enabled
       if (showGrid) {
         ctx.strokeStyle = "#aaa";
         for (let i = 0; i <= gridSize; i++) {
           let pos = i * cellSize;
-          ctx.beginPath();
-          ctx.moveTo(pos, 0);
-          ctx.lineTo(pos, canvas.height);
-          ctx.stroke();
-          ctx.beginPath();
-          ctx.moveTo(0, pos);
-          ctx.lineTo(canvas.width, pos);
-          ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(pos, 0); ctx.lineTo(pos, canvas.height); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(0, pos); ctx.lineTo(canvas.width, pos); ctx.stroke();
         }
       }
     }
 
     function drawTile(x, y, color) {
-      const px = x * cellSize;
-      const py = y * cellSize;
-      ctx.fillStyle = color;
-      ctx.fillRect(px, py, cellSize, cellSize);
-
+      const px = x * cellSize, py = y * cellSize;
+      ctx.fillStyle = color; ctx.fillRect(px, py, cellSize, cellSize);
       if (brickMode && color !== "#ffffff") {
-        ctx.strokeStyle = "rgba(0,0,0,0.15)";
-        ctx.strokeRect(px, py, cellSize, cellSize);
-        const studRadius = cellSize * 0.2;
-        const cx = px + cellSize / 2;
-        const cy = py + cellSize / 2;
+        ctx.strokeStyle = "rgba(0,0,0,0.15)"; ctx.strokeRect(px, py, cellSize, cellSize);
+        const studRadius = cellSize * 0.2, cx = px + cellSize / 2, cy = py + cellSize / 2;
         const gradient = ctx.createRadialGradient(cx, cy, studRadius * 0.3, cx, cy, studRadius);
-        gradient.addColorStop(0, "rgba(255,255,255,0.6)");
-        gradient.addColorStop(1, "rgba(0,0,0,0.3)");
-        ctx.fillStyle = gradient;
-        ctx.beginPath();
-        ctx.arc(cx, cy, studRadius, 0, Math.PI * 2);
-        ctx.fill();
+        gradient.addColorStop(0, "rgba(255,255,255,0.6)"); gradient.addColorStop(1, "rgba(0,0,0,0.3)");
+        ctx.fillStyle = gradient; ctx.beginPath(); ctx.arc(cx, cy, studRadius, 0, Math.PI * 2); ctx.fill();
       }
     }
 
     function drawPixel(x, y) {
       const color = mode === "eraser" ? "#ffffff" : document.getElementById("colorPicker").value;
       if (grid[y][x] !== color) {
-        history.push({ x, y, color: grid[y][x] });
-        redoStack = [];
+        history.push({ x, y, color: grid[y][x] }); redoStack = [];
         grid[y][x] = color;
-
         if (mirrorMode) {
           const mx = gridSize - 1 - x;
-          if (grid[y][mx] !== color) {
-            history.push({ x: mx, y, color: grid[y][mx] });
-            grid[y][mx] = color;
-          }
-        }
-        drawGrid();
+          if (grid[y][mx] !== color) { history.push({ x: mx, y, color: grid[y][mx] }); grid[y][mx] = color; }
+        } drawGrid();
       }
     }
 
     function fillBucket(x, y) {
-      const targetColor = grid[y][x];
-      const fillColor = document.getElementById("colorPicker").value;
+      const targetColor = grid[y][x], fillColor = document.getElementById("colorPicker").value;
       if (targetColor === fillColor) return;
-
       const stack = [[x, y]];
       while (stack.length) {
         const [cx, cy] = stack.pop();
-        if (cx < 0 || cy < 0 || cx >= gridSize || cy >= gridSize) continue;
+        if (cx<0||cy<0||cx>=gridSize||cy>=gridSize) continue;
         if (grid[cy][cx] !== targetColor) continue;
-
         grid[cy][cx] = fillColor;
-        stack.push([cx + 1, cy], [cx - 1, cy], [cx, cy + 1], [cx, cy - 1]);
-      }
-      drawGrid();
+        stack.push([cx+1,cy],[cx-1,cy],[cx,cy+1],[cx,cy-1]);
+      } drawGrid();
     }
 
     function getCoords(e) {
       const rect = canvas.getBoundingClientRect();
-      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-      return {
-        x: Math.floor((clientX - rect.left) / cellSize),
-        y: Math.floor((clientY - rect.top) / cellSize)
-      };
+      const clientX = e.touches?e.touches[0].clientX:e.clientX, clientY = e.touches?e.touches[0].clientY:e.clientY;
+      return { x: Math.floor((clientX - rect.left) / cellSize), y: Math.floor((clientY - rect.top) / cellSize) };
     }
 
     function setActiveTool(toolButton) {
@@ -296,151 +178,53 @@
       if (toolButton) toolButton.classList.add("active");
     }
 
-    // Templates
     function loadImageTemplate(url) {
-      const img = new Image();
-      img.src = url;
-      img.crossOrigin = "Anonymous";
-      img.onload = function () {
+      const img = new Image(); img.src = url; img.crossOrigin = "Anonymous";
+      img.onload = function() {
         const tempCanvas = document.createElement("canvas");
-        tempCanvas.width = gridSize;
-        tempCanvas.height = gridSize;
-        const tempCtx = tempCanvas.getContext("2d");
-        tempCtx.drawImage(img, 0, 0, gridSize, gridSize);
-        const imageData = tempCtx.getImageData(0, 0, gridSize, gridSize).data;
-
-        for (let y = 0; y < gridSize; y++) {
-          for (let x = 0; x < gridSize; x++) {
-            const i = (y * gridSize + x) * 4;
-            const r = imageData[i], g = imageData[i + 1], b = imageData[i + 2];
-            grid[y][x] = `#${[r, g, b].map(c => c.toString(16).padStart(2, '0')).join('')}`;
-          }
-        }
+        tempCanvas.width = gridSize; tempCanvas.height = gridSize;
+        const tempCtx = tempCanvas.getContext("2d"); tempCtx.drawImage(img,0,0,gridSize,gridSize);
+        const imageData = tempCtx.getImageData(0,0,gridSize,gridSize).data;
+        for(let y=0;y<gridSize;y++) for(let x=0;x<gridSize;x++){const i=(y*gridSize+x)*4;const r=imageData[i],g=imageData[i+1],b=imageData[i+2];grid[y][x]=`#${[r,g,b].map(c=>c.toString(16).padStart(2,'0')).join('')}`;}
         drawGrid();
       };
-      img.onerror = () => alert("Failed to load template image.");
+      img.onerror=()=>alert("Failed to load template image.");
     }
-
     function handleTemplateLoad(value) {
-      if (value === "__buildADood") {
-        loadImageTemplate("https://i.ibb.co/yB60PRWs/build-a-dood.jpg");
-      } else if (value === "__sheepDood") {
-        loadImageTemplate("https://i.ibb.co/7t1RBWG8/dood-pixel-art-34.jpg");
-      } else {
-        loadFromList(value);
-      }
+      if (value==="__buildADood") loadImageTemplate("https://i.ibb.co/yB60PRWs/build-a-dood.jpg");
+      else if(value==="__sheepDood") loadImageTemplate("https://i.ibb.co/7t1RBWG8/dood-pixel-art-34.jpg");
+      else loadFromList(value);
     }
 
-    // Save/Load/Delete
-    function saveNamed() {
-      const name = document.getElementById("saveName").value.trim();
-      if (!name) return alert("Enter a name to save.");
-      localStorage.setItem(`doodNamed:${name}`, JSON.stringify(grid));
-      updateSavedDropdown();
-      alert(`Saved as "${name}"`);
-    }
-    function loadNamed() {
-      const name = document.getElementById("saveName").value.trim();
-      const data = localStorage.getItem(`doodNamed:${name}`);
-      if (!data) return alert("No saved design found.");
-      grid = JSON.parse(data);
-      drawGrid();
-    }
-    function deleteNamed() {
-      const name = document.getElementById("saveName").value.trim();
-      localStorage.removeItem(`doodNamed:${name}`);
-      updateSavedDropdown();
-    }
-    function updateSavedDropdown() {
-      const list = document.getElementById("savedList");
-      list.innerHTML = '<option disabled selected>Select a saved design</option>';
-      Object.keys(localStorage).filter(k => k.startsWith('doodNamed:')).forEach(k => {
-        const name = k.replace('doodNamed:', '');
-        const option = document.createElement('option');
-        option.value = name;
-        option.textContent = "💾 " + name;
-        list.appendChild(option);
-      });
-    }
-    function loadFromList(name) {
-      document.getElementById("saveName").value = name;
-      loadNamed();
-    }
+    function saveNamed(){const name=document.getElementById("saveName").value.trim();if(!name)return alert("Enter a name to save.");localStorage.setItem(`doodNamed:${name}`,JSON.stringify(grid));updateSavedDropdown();alert(`Saved as "${name}"`);}
+    function loadNamed(){const name=document.getElementById("saveName").value.trim();const data=localStorage.getItem(`doodNamed:${name}`);if(!data)return alert("No saved design found.");grid=JSON.parse(data);drawGrid();}
+    function deleteNamed(){const name=document.getElementById("saveName").value.trim();localStorage.removeItem(`doodNamed:${name}`);updateSavedDropdown();}
+    function updateSavedDropdown(){const list=document.getElementById("savedList");list.innerHTML='<option disabled selected>Select a saved design</option>';Object.keys(localStorage).filter(k=>k.startsWith('doodNamed:')).forEach(k=>{const name=k.replace('doodNamed:','');const option=document.createElement('option');option.value=name;option.textContent="💾 "+name;list.appendChild(option);});}
+    function loadFromList(name){document.getElementById("saveName").value=name;loadNamed();}
+    function saveAsJPG(){const link=document.createElement("a");link.download=`dood-pixel-${Date.now()}.jpg`;link.href=canvas.toDataURL("image/jpeg",0.95);link.click();}
+    function shareOnTwitter(){const text=encodeURIComponent("Check out this Dood-el! #StayDoodish #XRPL");const url="https://twitter.com/intent/tweet?text="+text;window.open(url,"_blank");}
 
-    // Mouse + Touch Events
-    canvas.addEventListener("mousedown", e => {
-      const { x, y } = getCoords(e);
-      if (mode === "bucket") {
-        fillBucket(x, y);
-        mode = "brush";
-        setActiveTool(document.getElementById("brushBtn"));
-        return;
-      }
-      isDrawing = true;
-      drawPixel(x, y);
-    });
-    canvas.addEventListener("mousemove", e => {
-      if (!isDrawing || mode === "bucket") return;
-      drawPixel(...Object.values(getCoords(e)));
-    });
-    canvas.addEventListener("mouseup", () => isDrawing = false);
-    canvas.addEventListener("mouseleave", () => isDrawing = false);
-    canvas.addEventListener("touchstart", e => {
-      e.preventDefault();
-      const { x, y } = getCoords(e);
-      if (mode === "bucket") {
-        fillBucket(x, y);
-        mode = "brush";
-        setActiveTool(document.getElementById("brushBtn"));
-        return;
-      }
-      isDrawing = true;
-      drawPixel(x, y);
-    }, { passive: false });
-    canvas.addEventListener("touchmove", e => {
-      e.preventDefault();
-      if (!isDrawing || mode === "bucket") return;
-      drawPixel(...Object.values(getCoords(e)));
-    }, { passive: false });
-    canvas.addEventListener("touchend", () => isDrawing = false);
+    canvas.addEventListener("mousedown",e=>{const {x,y}=getCoords(e);if(mode==="bucket"){fillBucket(x,y);mode="brush";setActiveTool(document.getElementById("brushBtn"));return;}isDrawing=true;drawPixel(x,y);});
+    canvas.addEventListener("mousemove",e=>{if(!isDrawing||mode==="bucket")return;drawPixel(...Object.values(getCoords(e)));});
+    canvas.addEventListener("mouseup",()=>isDrawing=false);
+    canvas.addEventListener("mouseleave",()=>isDrawing=false);
+    canvas.addEventListener("touchstart",e=>{e.preventDefault();const{x,y}=getCoords(e);if(mode==="bucket"){fillBucket(x,y);mode="brush";setActiveTool(document.getElementById("brushBtn"));return;}isDrawing=true;drawPixel(x,y);},{passive:false});
+    canvas.addEventListener("touchmove",e=>{e.preventDefault();if(!isDrawing||mode==="bucket")return;drawPixel(...Object.values(getCoords(e)));},{passive:false});
+    canvas.addEventListener("touchend",()=>isDrawing=false);
 
-    // Tool Buttons
-    document.getElementById("brushBtn").onclick = () => { mode = "brush"; setActiveTool(document.getElementById("brushBtn")); };
-    document.getElementById("eraserBtn").onclick = () => { mode = "eraser"; setActiveTool(document.getElementById("eraserBtn")); };
-    document.getElementById("bucketBtn").onclick = () => { mode = "bucket"; setActiveTool(document.getElementById("bucketBtn")); };
-
-    document.getElementById("undoBtn").onclick = () => {
-      const last = history.pop();
-      if (last) {
-        redoStack.push({ x: last.x, y: last.y, color: grid[last.y][last.x] });
-        grid[last.y][last.x] = last.color;
-        drawGrid();
-      }
-    };
-    document.getElementById("redoBtn").onclick = () => {
-      const last = redoStack.pop();
-      if (last) {
-        history.push({ x: last.x, y: last.y, color: grid[last.y][last.x] });
-        grid[last.y][last.x] = last.color;
-        drawGrid();
-      }
-    };
-    document.getElementById("clearBtn").onclick = () => { grid = initGrid(gridSize); drawGrid(); };
-    document.getElementById("toggleGridBtn").onclick = () => { showGrid = !showGrid; drawGrid(); };
-    document.getElementById("mirrorBtn").onclick = () => { mirrorMode = !mirrorMode; alert(`Mirror mode: ${mirrorMode ? "ON" : "OFF"}`); };
-    document.getElementById("brickBtn").onclick = () => { brickMode = !brickMode; drawGrid(); };
-
-    document.getElementById("gridSizeSelect").onchange = (e) => {
-      gridSize = parseInt(e.target.value);
-      grid = initGrid(gridSize);
-      cellSize = canvas.width / gridSize;
-      drawGrid();
-    };
+    document.getElementById("brushBtn").onclick=()=>{mode="brush";setActiveTool(document.getElementById("brushBtn"));};
+    document.getElementById("eraserBtn").onclick=()=>{mode="eraser";setActiveTool(document.getElementById("eraserBtn"));};
+    document.getElementById("bucketBtn").onclick=()=>{mode="bucket";setActiveTool(document.getElementById("bucketBtn"));};
+    document.getElementById("undoBtn").onclick=()=>{const last=history.pop();if(last){redoStack.push({x:last.x,y:last.y,color:grid[last.y][last.x]});grid[last.y][last.x]=last.color;drawGrid();}};
+    document.getElementById("redoBtn").onclick=()=>{const last=redoStack.pop();if(last){history.push({x:last.x,y:last.y,color:grid[last.y][last.x]});grid[last.y][last.x]=last.color;drawGrid();}};
+    document.getElementById("clearBtn").onclick=()=>{grid=initGrid(gridSize);drawGrid();};
+    document.getElementById("toggleGridBtn").onclick=()=>{showGrid=!showGrid;drawGrid();};
+    document.getElementById("mirrorBtn").onclick=()=>{mirrorMode=!mirrorMode;alert(`Mirror mode: ${mirrorMode?"ON":"OFF"}`);};
+    document.getElementById("brickBtn").onclick=()=>{brickMode=!brickMode;drawGrid();};
+    document.getElementById("gridSizeSelect").onchange=(e)=>{gridSize=parseInt(e.target.value);grid=initGrid(gridSize);cellSize=canvas.width/gridSize;drawGrid();};
 
     window.addEventListener("resize", resizeCanvas);
-
-    resizeCanvas();
-    updateSavedDropdown();
+    window.addEventListener("load", resizeCanvas);
   </script>
 </body>
 </html>
